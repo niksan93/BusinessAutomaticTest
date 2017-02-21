@@ -1,0 +1,86 @@
+﻿@using System.Collections
+@using Kendo.Mvc.UI
+@using MongoDB.Bson
+@using TelerikMvcApp1.Models
+@model IEnumerable<IndexUser>
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<h2>Users</h2>
+
+<div>
+    <p>
+        <input onclick="location.href = '@Url.Action("NewUser", "Home")'" value = "Add User" type="button" />
+        
+        <input onclick="location.href = '@Url.Action("NewDepartment", "Home")'" value="Add Department" type="button" />
+        
+        <input onclick="location.href = '@Url.Action("DepartmentsList", "Home")'" value="Show Department List" type="button" />
+    </p>
+</div>
+
+<div>
+
+    @(Html.Kendo().Grid(Model)
+          .Name("UsersGrid")
+          .Columns(columns =>
+          {
+              columns.Bound(user => user.UserID)
+                  .Width(40);
+              columns.Bound(user => user.UserName);
+              columns.Bound(user => user.Department);
+              columns.Command(cmd =>
+              {
+                  cmd.Edit();
+                  cmd.Destroy();
+              }).Width(250);
+          })
+          .Selectable(selectable => selectable
+              .Mode(GridSelectionMode.Single)
+              .Type(GridSelectionType.Row))
+                  .Editable(editable => editable.Mode(GridEditMode.PopUp))
+          .HtmlAttributes(new { style = "height: 350px;" })
+          .DataSource(dataSource => dataSource
+              .Ajax()
+              .Read(read => read.Action("Index", "Home"))
+              .Update(update => update.Action("EditUser", "Home"))
+              .Destroy("DeleteUser", "Home")
+              .Model(model => { model.Id("_id");
+              model.Field(f => f.UserID).Editable(false);
+              model.Field(f => f.Department).Editable(false);
+              }).Events(evemts => evemts.RequestEnd("onGridDataSourceRequestEnd"))       
+              ))
+
+</div>
+
+<script type="text/javascript">
+    function onGridDataSourceRequestEnd(e) {
+        if (e.type === "destroy") {
+           // $("#UsersGrid").data("kendoGrid").dataSource.read();
+        }
+    }
+    $(function () {
+        $('#deleteBtn').click(function () {
+            debugger;
+            var items = {};
+            var grid = $('#UsersGrid').data('kendoGrid');
+            var selectedElements = grid.select();
+
+            for (var j = 0; j < selectedElements.length; j++) {
+                var item = grid.dataItem(selectedElements[j]);
+                items['users[' + j + '].UserName'] = item.UserName;
+                items['users[' + j + '].Department'] = item.Department;
+                items['users[' + j + '].UserID'] = item.UserID;
+            }
+
+            $.ajax({
+                type: "POST",
+                data: items,
+                url: '@Url.Action("DeleteUser", "Home")',
+                success: function (result) {
+                    console.log(result);
+                }
+            })
+        })
+    })
+</script>

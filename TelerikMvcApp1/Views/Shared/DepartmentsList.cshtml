@@ -1,0 +1,40 @@
+﻿@model IEnumerable<TelerikMvcApp1.Models.Department>
+
+@{
+    ViewBag.Title = "Departments List";
+}
+
+<h2>Departments List</h2>
+
+<div>
+    @(Html.Kendo().Grid(Model)
+          .Name("DepartmentsGrid")
+          .Columns(columns =>
+          {
+              columns.Bound(dep => dep.Title);
+              columns.Command(cmd =>
+              {
+                  cmd.Edit();
+                  cmd.Destroy();
+              });
+          })
+          .Selectable(selectable => selectable
+              .Mode(GridSelectionMode.Single)
+              .Type(GridSelectionType.Row))
+          .Editable(editable => editable.Mode(GridEditMode.PopUp))
+          .HtmlAttributes(new { style = "height: 350px;" })
+          .DataSource(dataSource => dataSource
+              .Ajax()
+              .Read(read => read.Action("DepartmentsList", "Home"))
+                      .Update(update => update.Action("EditDepartment", "Home"))
+                      .Destroy("DeleteDepartment", "Home")
+              .Model(model =>
+              {
+                  model.Id(p => p._id);
+                  model.Field(f => f._id).Editable(false);
+              })
+          ))
+</div>
+<div>
+    <input onclick="location.href = '@Url.Action("Index", "Home")'" value="Back to users list" type="button" />
+</div>

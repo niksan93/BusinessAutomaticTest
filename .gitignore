@@ -1,0 +1,8 @@
+$ cat .gitignore
+/packages/
+/TelerikMvcApp1/bin
+/TelerikMvcApp1/obj
+/ABBYYTest.UnitTests/bin
+/ABBYYTest.UnitTests/obj
+*.*.suo
+/ABBYYTest/.nuget
